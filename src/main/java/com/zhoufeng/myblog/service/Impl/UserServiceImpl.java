@@ -39,13 +39,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User login(User loginUser) {
-        String username = loginUser.getUsername();
-        String password = EncryptUtils.md5Encode(loginUser.getPassword());
-        return userMapper.selectByUsernameAndPassword(username, password);
-    }
-
-    @Override
     public Integer register(User user) {
         String password = user.getPassword();
         user.setPassword(EncryptUtils.md5Encode(password));

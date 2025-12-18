@@ -13,8 +13,6 @@ public interface UserService {
 
     Integer modify(User user);
 
-    User login(User user);
-
     Integer register(User user);
 
     User getByUsername(String username);
