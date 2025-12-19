@@ -1,9 +1,9 @@
 package com.zhoufeng.myblog.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import com.zhoufeng.myblog.entity.Category;
 import com.zhoufeng.myblog.service.CategoryService;
-import com.zhoufeng.myblog.utils.Permission;
 import com.zhoufeng.myblog.utils.Result;
 
 import javax.annotation.Resource;
@@ -15,8 +15,6 @@ import java.util.Map;
 public class CategoryController {
     @Resource
     private CategoryService categoryService;
-    @Resource
-    private Permission permission;
 
     @GetMapping
     public Result listAll() {
@@ -55,10 +53,8 @@ public class CategoryController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public Result add(String categoryName) {
-        if (!permission.allow()) {
-            return new Result(0, "没有权限", null);
-        }
         try {
             if (categoryName != null && categoryName.trim().length() > 0) {
                 Category category = new Category();
@@ -75,10 +71,8 @@ public class CategoryController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public Result modify(@PathVariable Integer id, String categoryName) {
-        if (!permission.allow()) {
-            return new Result(0, "没有权限", null);
-        }
         try {
             if (categoryName != null && categoryName.trim().length() > 0) {
                 Category category = new Category();
@@ -96,10 +90,8 @@ public class CategoryController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public Result remove(@PathVariable Integer id) {
-        if (!permission.allow()) {
-            return new Result(0, "没有权限", null);
-        }
         Integer count = categoryService.removeById(id);
         if (count == 1) {
             return new Result(1, "删除成功", null);

@@ -6,6 +6,7 @@ import com.zhoufeng.myblog.entity.User;
 import com.zhoufeng.myblog.service.Impl.UserDetailsImpl;
 import com.zhoufeng.myblog.service.UserService;
 import com.zhoufeng.myblog.utils.Result;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -39,16 +40,8 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public Result delete(@PathVariable Integer id, HttpSession session) {
-        Object obj = session.getAttribute("user");
-        if (obj == null) {
-            return new Result(0, "没有权限", null);
-        }
-        User user = (User) obj;
-        String username = user.getUsername();
-        if (!"admin".equals(username)) {
-            return new Result(0, "没有权限", null);
-        }
+    @PreAuthorize("hasRole('ADMIN')")
+    public Result delete(@PathVariable Integer id) {
         Integer count = userService.remove(id);
         if (count == 1) {
             return new Result(1, "删除成功", null);
@@ -57,20 +50,12 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public Result modify(@PathVariable Integer id, Integer type, HttpSession session) {
-        Object obj = session.getAttribute("user");
-        if (obj == null) {
-            return new Result(0, "没有权限", null);
-        }
-        User user = (User) obj;
-        String username = user.getUsername();
-        if (!"admin".equals(username)) {
-            return new Result(0, "没有权限", null);
-        }
-        User user1 = new User();
-        user1.setId(id);
-        user1.setType(type);
-        Integer count = userService.modify(user1);
+    @PreAuthorize("hasRole('ADMIN')")
+    public Result modify(@PathVariable Integer id, Integer type) {
+        User user = new User();
+        user.setId(id);
+        user.setType(type);
+        Integer count = userService.modify(user);
         if (count == 1) {
             return new Result(1, "更新成功", null);
         }
@@ -78,15 +63,7 @@ public class UserController {
     }
 
     @PutMapping("/r")
-    public Result modify(String email, String password, String checkCode, HttpSession session) {
-        Object obj = session.getAttribute(email);
-        if (obj == null) {
-            return new Result(0, "验证码错误", null);
-        }
-        String code = (String) obj;
-        if (!code.equals(checkCode)) {
-            return new Result(0, "验证码错误", null);
-        }
+    public Result modify(String email, String password) {
         User user = userService.getByEmail(email);
         user.setPassword(password);
         Integer count = userService.modify(user);
@@ -112,7 +89,7 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public Result register(User user, HttpSession session) {
+    public Result register(User user) {
         Integer count = userService.register(user);
         if (count == 1) {
             return new Result(1, "注册成功", null);

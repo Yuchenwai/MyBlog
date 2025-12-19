@@ -1,9 +1,9 @@
 package com.zhoufeng.myblog.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import com.zhoufeng.myblog.entity.Tag;
 import com.zhoufeng.myblog.service.TagService;
-import com.zhoufeng.myblog.utils.Permission;
 import com.zhoufeng.myblog.utils.Result;
 
 import javax.annotation.Resource;
@@ -14,9 +14,6 @@ import java.util.List;
 public class TagController {
     @Resource
     private TagService tagService;
-
-    @Resource
-    private Permission permission;
 
     @GetMapping
     public Result listAll() {
@@ -46,10 +43,8 @@ public class TagController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public Result add(String tagName) {
-        if (!permission.allow()) {
-            return new Result(0, "没有权限", null);
-        }
         try {
             if (tagName != null && tagName.trim().length() > 0) {
                 Tag tag = new Tag();
@@ -66,10 +61,8 @@ public class TagController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public Result modify(@PathVariable Integer id, String tagName) {
-        if (!permission.allow()) {
-            return new Result(0, "没有权限", null);
-        }
         try {
             if (tagName != null && tagName.trim().length() > 0) {
                 Tag tag = new Tag();
@@ -87,10 +80,8 @@ public class TagController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public Result remove(@PathVariable Integer id) {
-        if (!permission.allow()) {
-            return new Result(0, "没有权限", null);
-        }
         Integer count = tagService.removeById(id);
         if (count == 1) {
             return new Result(1, "删除成功", null);

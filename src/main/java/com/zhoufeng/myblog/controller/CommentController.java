@@ -2,12 +2,11 @@ package com.zhoufeng.myblog.controller;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import com.zhoufeng.myblog.entity.Comment;
 import com.zhoufeng.myblog.entity.User;
 import com.zhoufeng.myblog.service.CommentService;
-import com.zhoufeng.myblog.service.UserService;
-import com.zhoufeng.myblog.utils.Permission;
 import com.zhoufeng.myblog.utils.Result;
 
 import javax.annotation.Resource;
@@ -20,10 +19,6 @@ import java.util.List;
 public class CommentController {
     @Resource
     private CommentService commentService;
-    @Resource
-    private UserService userService;
-    @Resource
-    private Permission permission;
 
     @GetMapping("/pg")
     public Result listAll(Integer page, Integer pageSize) {
@@ -46,7 +41,7 @@ public class CommentController {
                 if (user.getId() != null) {
                     String email = user.getEmail();
                     int d = email.indexOf("@");
-                    StringBuilder emailBuilder = new StringBuilder();
+                    StringBuilder emailBuilder;
                     if (d <= 3) {
                         emailBuilder = new StringBuilder(email.substring(0, 1));
                         for (int i = 0; i < d - 1; i++) {
@@ -105,10 +100,8 @@ public class CommentController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public Result remove(@PathVariable Integer id) {
-        if (!permission.allow()) {
-            return new Result(0, "没有权限", null);
-        }
         Integer count = commentService.remove(id);
         if (count == 1) {
             return new Result(1, "删除成功", null);

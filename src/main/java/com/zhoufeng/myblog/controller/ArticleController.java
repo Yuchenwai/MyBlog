@@ -2,12 +2,12 @@ package com.zhoufeng.myblog.controller;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import com.zhoufeng.myblog.entity.Article;
 import com.zhoufeng.myblog.entity.Tag;
 import com.zhoufeng.myblog.service.ArticleService;
 import com.zhoufeng.myblog.service.TagService;
-import com.zhoufeng.myblog.utils.Permission;
 import com.zhoufeng.myblog.utils.Result;
 
 import javax.annotation.Resource;
@@ -21,8 +21,6 @@ public class ArticleController {
     private ArticleService articleService;
     @Resource
     private TagService tagService;
-    @Resource
-    private Permission permission;
 
     @GetMapping
     public Result list(@RequestParam(required = false) Integer page,
@@ -91,10 +89,8 @@ public class ArticleController {
     }
 
     @PutMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public Result modifyArticle(Article article, Integer categoryId, String tagIds) {
-        if (!permission.allow()) {
-            return new Result(0, "没有权限", null);
-        }
         Integer count = articleService.modify(article, categoryId, tagIds);
         if (count == 1) {
             return new Result(1, "修改成功", null);
@@ -103,10 +99,8 @@ public class ArticleController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public Result add(Article article, Integer categoryId, String tagIds) {
-        if (!permission.allow()) {
-            return new Result(0, "没有权限", null);
-        }
         int status = article.getStatus();
         Integer count = articleService.add(article, categoryId, tagIds);
         if (count == 1) {
@@ -116,10 +110,8 @@ public class ArticleController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public Result remove(@PathVariable Integer id) {
-        if (!permission.allow()) {
-            return new Result(0, "没有权限", null);
-        }
         Integer count = articleService.removeById(id);
         if (count == 1) {
             return new Result(1, "删除成功", null);
